@@ -28,7 +28,7 @@ export interface RaceParticipant { // Участник гонки ID
   animationId?: number; // ID анимации для отмены
 }
 
-export type RaceStatus = 'idle' | 'preparing' | 'racing' | 'finished';
+export type RaceStatus = 'idle' | 'preparing' | 'racing' | 'finished'; // статусы гонки, для остлеживания состояния.
 
 export interface RaceWinner {
   car: Car;
