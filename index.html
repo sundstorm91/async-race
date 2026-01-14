@@ -7,7 +7,31 @@
     <title>async-race</title>
   </head>
   <body>
-    <div id="app"></div>
+    <!-- <div id="app"></div> -->
+
+     <header class="header">
+        <h1>Async Race</h1>
+        <nav class="tabs">
+            <button id="garage-tab" class="tab active">Garage</button>
+            <button id="winners-tab" class="tab">Winners</button>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        <!-- Garage View -->
+        <section id="garage-view" class="view active">
+            <div id="garage-container"></div>
+        </section>
+
+        <!-- Winners View -->
+        <section id="winners-view" class="view">
+            <div id="winners-container"></div>
+        </section>
+    </main>
+
+    <!-- Модалка победителя -->
+    <div id="winner-modal" class="modal" style="display: none;"></div>
+
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
