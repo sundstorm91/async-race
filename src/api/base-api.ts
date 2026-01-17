@@ -32,22 +32,38 @@ export abstract class BaseApi {
   }
 
   private async handleResponse<T>(
-    response: Response,
-    readHeaders?: boolean
-  ): Promise<T> {
-    if (!response.ok) {
-      throw this.createError('Request failed', response.status, response.url);
-    }
+  response: Response,
+  readHeaders?: boolean
+): Promise<T> {
+  console.log('🔍 handleResponse вызван');
+  console.log('readHeaders:', readHeaders);
+  console.log('URL:', response.url);
 
-    const data = await response.json();
-
-    if (readHeaders) {
-      const total = response.headers.get('X-Total-Count');
-      return { ...data, total: Number(total) } as T;
-    }
-
-    return data as T;
+  if (!response.ok) {
+    throw this.createError('Request failed', response.status, response.url);
   }
+
+  const data = await response.json();
+  console.log('📦 Raw data:', data);
+  console.log('📦 Type of data:', typeof data);
+  console.log('📦 Is array?:', Array.isArray(data));
+
+  if (readHeaders) {
+    const total = response.headers.get('X-Total-Count');
+    console.log('📊 X-Total-Count header:', total);
+
+    const result = {
+      cars: data,           // предполагаем что data массив
+      total: Number(total)
+    };
+
+    console.log('📤 Returning:', result);
+    return result as T;
+  }
+
+  console.log('📤 Returning raw data:', data);
+  return data as T;
+}
 
   private async request<T>(
     url: string,
