@@ -33,3 +33,13 @@ export interface ApiError {
 export interface EngineError extends ApiError {
   carId: number;
 }
+
+export class ApiError extends Error {
+   constructor(
+    public message: string,
+    public status: number,
+    public url: string,
+   ) {
+    super(`${message}${status}`)
+   }
+}
