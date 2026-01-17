@@ -1,3 +1,4 @@
+import { EngineApi } from './api/engine-api';
 import { GarageApi } from './api/garage-api';
 import './style.css'
 
@@ -34,4 +35,46 @@ async function main() {
   }
 }
 
-main();
+async function testEngineApi() {
+  const engineApi = new EngineApi('http://localhost:3000');
+
+  console.log('🧪 Тестируем EngineApi...');
+
+  try {
+    // 1. Запуск двигателя
+    console.log('\n1. 🔥 Запускаем двигатель машины 1...');
+    const engine = await engineApi.startEngine(1);
+    console.log('   ✅ Двигатель запущен!');
+    console.log('   Скорость:', engine.velocity);
+    console.log('   Дистанция:', engine.distance);
+    console.log('   Время гонки:', engine.distance / engine.velocity, 'ms');
+
+    // 2. Пробуем проехать
+    console.log('\n2. 🚗 Пробуем проехать...');
+    const driveResult = await engineApi.drive(1);
+    console.log('   Результат drive:', driveResult.success ? 'Успех!' : 'Сломалась!');
+
+    // 3. Останавливаем
+    console.log('\n3. 🛑 Останавливаем двигатель...');
+    await engineApi.stopEngine(1);
+    console.log('   ✅ Двигатель остановлен');
+
+    // 4. Тест сломанной машины (если API поддерживает)
+    console.log('\n4. 🔧 Тест сломанной машины...');
+    try {
+      const brokenResult = await engineApi.drive(999); // несуществующая машина
+      console.log('   Результат:', brokenResult.success ? 'Успех' : 'Сломалась');
+    } catch (error) {
+      console.log('   ❌ Ошибка (не 500):', error);
+    }
+
+    console.log('\n🎉 EngineApi работает корректно!');
+
+  } catch (error) {
+    console.error('❌ Ошибка EngineApi:', error);
+  }
+}
+
+/* testEngineApi() */
+
+/* main(); */
