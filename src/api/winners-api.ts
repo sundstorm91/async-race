@@ -25,7 +25,7 @@ interface IWinnersApi {
  */
 
 export class WinnersApi extends BaseApi implements IWinnersApi {
-    constructor(baseUrl: string, defaultHeaders: Record<string, string>) {
+    constructor(baseUrl: string, defaultHeaders?: Record<string, string>) {
       super(baseUrl, defaultHeaders)
     }
 

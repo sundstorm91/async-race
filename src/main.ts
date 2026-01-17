@@ -1,5 +1,6 @@
 import { EngineApi } from './api/engine-api';
 import { GarageApi } from './api/garage-api';
+import { WinnersApi } from './api/winners-api';
 import './style.css'
 
 async function main() {
@@ -75,6 +76,24 @@ async function testEngineApi() {
   }
 }
 
+async function testWinnersApi() {
+  const api = new WinnersApi('http://localhost:3000');
+
+  // 1. Сортировка по победам
+  const byWins = await api.getWinners(1, 5, 'wins', 'DESC');
+  console.log('Победители по победам:', byWins.winners);
+
+  // 2. Сортировка по времени
+  const byTime = await api.getWinners(1, 5, 'time', 'ASC');
+  console.log('Победители по времени:', byTime.winners);
+
+  // 3. Пагинация
+  const page2 = await api.getWinners(2, 3);
+  console.log('Страница 2:', page2.winners.length);
+}
+
 /* testEngineApi() */
 
 /* main(); */
+
+testWinnersApi();
