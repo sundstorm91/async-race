@@ -1,6 +1,7 @@
+import { WinnersApi } from './api';
 import { EngineApi } from './api/engine-api';
 import { GarageApi } from './api/garage-api';
-import { WinnersApi } from './api/winners-api';
+
 import './style.css'
 
 async function main() {
@@ -79,21 +80,42 @@ async function testEngineApi() {
 async function testWinnersApi() {
   const api = new WinnersApi('http://localhost:3000');
 
-  // 1. Сортировка по победам
-  const byWins = await api.getWinners(1, 5, 'wins', 'DESC');
-  console.log('Победители по победам:', byWins.winners);
+  console.log('🧪 Тестируем WinnersApi...');
 
-  // 2. Сортировка по времени
-  const byTime = await api.getWinners(1, 5, 'time', 'ASC');
-  console.log('Победители по времени:', byTime.winners);
+  try {
+    // 1. Сначала проверь raw запрос
+    console.log('\n1. 📡 Raw fetch запрос:');
+    const rawResponse = await fetch('http://localhost:3000/winners?_page=1&_limit=5&_sort=wins&_order=DESC');
+    console.log('   Статус:', rawResponse.status);
+    console.log('   Заголовки:', Object.fromEntries(rawResponse.headers.entries()));
 
-  // 3. Пагинация
-  const page2 = await api.getWinners(2, 3);
-  console.log('Страница 2:', page2.winners.length);
+    const rawData = await rawResponse.json();
+    console.log('   Raw данные:', rawData);
+    console.log('   Тип данных:', typeof rawData);
+    console.log('   Это массив?:', Array.isArray(rawData));
+
+    // 2. Проверь WinnersApi
+    console.log('\n2. 🏆 WinnersApi запрос:');
+    const result = await api.getWinners(1, 5, 'wins', 'DESC');
+    console.log('   Result:', result);
+    console.log('   Result.winners:', result.winners);
+    console.log('   Result.total:', result.total);
+
+    // 3. Только потом проверяй length
+    if (result.winners) {
+      console.log('   Количество победителей:', result.winners.length);
+    } else {
+      console.log('   ❌ winners undefined!');
+    }
+
+  } catch (error) {
+    console.error('❌ Ошибка:', error);
+  }
 }
 
 /* testEngineApi() */
 
 /* main(); */
+
 
 testWinnersApi();

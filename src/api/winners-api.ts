@@ -53,6 +53,4 @@ export class WinnersApi extends BaseApi implements IWinnersApi {
     updateWinner(id: number, winner: Partial<Winner>): Promise<Winner> {
        return this.put(`/winners/${id}`, winner)
     }
-
-
 }
