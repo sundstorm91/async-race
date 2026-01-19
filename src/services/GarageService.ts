@@ -45,7 +45,10 @@ export class GarageService implements IGarageService {
             garage: {
                 ...prevState.garage,
                 cars: [...prevState.garage.cars, newCar],
-                total: prevState.garage.pagination.total + 1
+                pagination: {
+                    ...prevState.garage.pagination,
+                    total: prevState.garage.pagination.total + 1
+                }
             }
 
         }))
@@ -60,7 +63,7 @@ export class GarageService implements IGarageService {
             ...prevState,
             garage: {
                 ...prevState.garage,
-                 car: prevState.garage.cars.filter(car => car.id !== id),
+                 cars: prevState.garage.cars.filter(car => car.id !== id),
             pagination: {
                 ...prevState.garage.pagination,
                 total: prevState.garage.pagination.total - 1
@@ -150,7 +153,7 @@ export class GarageService implements IGarageService {
                 }
             }))
 
-            this.eventBus.emit('car:loaded', { cars, total })
+            this.eventBus.emit('cars:loaded', { cars, total })
 
         } catch (err) {
 
@@ -171,15 +174,16 @@ export class GarageService implements IGarageService {
 
         if (!selectedCar) return;
 
-        const updateCar = await this.garageApi.updateCar(id, updates);
+        const newDataCar = await this.garageApi.updateCar(id, updates);
 
         this.stateManager.setState(prevState => ({
 
             garage: {
                 ...prevState.garage,
-                cars: prevState.garage.cars.map(car => car.id === selectedCar.id ? updateCar : car),
-                selectedCar: null,
+                cars: prevState.garage.cars.map(car => car.id === selectedCar.id ? newDataCar : car),
+                selectedCar: null
             }
+
         }))
     }
 
