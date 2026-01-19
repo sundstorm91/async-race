@@ -166,20 +166,21 @@ export class GarageService implements IGarageService {
         }
     }
 
-    /* async updateCar(id: number, updates: Partial<Car>): Promise<void> {
-            if (this.stateManager.getState().garage.selectedCar) {
-                await this.garageApi.updateCar(id, this.stateManager.getState().garage.selectedCar)
-            }
+    async updateCar(id: number, updates: Partial<Car>): Promise<void> {
+        const selectedCar = this.stateManager.getState().garage.selectedCar;
 
-    } */
+        if (!selectedCar) return;
+
+        const updateCar = await this.garageApi.updateCar(id, updates);
+
+        this.stateManager.setState(prevState => ({
+
+            garage: {
+                ...prevState.garage,
+                cars: prevState.garage.cars.map(car => car.id === selectedCar.id ? updateCar : car),
+                selectedCar: null,
+            }
+        }))
+    }
 
 }
-
-/* garage: {
-    ...prevState.garage,
-    cars: [...prevState.garage.cars, newCar],
-    pagination: {
-        ...prevState.garage.pagination,
-        total: prevState.garage.pagination.total + 1
-    }
-} */
