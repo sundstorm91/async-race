@@ -29,7 +29,7 @@ export class WinnersApi extends BaseApi implements IWinnersApi {
       super(baseUrl, defaultHeaders)
     }
 
-    createWinner(winner: Omit<Winner, "id">): Promise<Winner> {
+    createWinner(winner: Winner): Promise<Winner> {
       return this.post('/winners', winner )
     }
 

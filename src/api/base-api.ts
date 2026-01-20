@@ -95,7 +95,7 @@ export abstract class BaseApi {
 
   protected async post<T>(
     endpoint: string,
-    data: Record<string, unknown>,
+    data: unknown,
     params?: Record<string, unknown>,
     headers?: Record<string, string>
   ): Promise<T> {
