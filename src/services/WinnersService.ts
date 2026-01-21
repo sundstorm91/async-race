@@ -42,11 +42,8 @@ export class WinnerService implements IWinnersService {
       await this.updateExistingWinner(winner.car.id, winner.time);
 
       this.eventBus.emit('winner:updated', { winner })
-      this.loadWinners();
 
      } catch (err) {
-
-      /* в дальнейшем посмотреть этот момент! */
 
       if (err instanceof ApiError && err.status === 404) {
 
@@ -58,7 +55,6 @@ export class WinnerService implements IWinnersService {
 
         this.eventBus.emit('winner:created', { winner })
 
-        this.loadWinners();
 
      } else {
 
@@ -68,8 +64,9 @@ export class WinnerService implements IWinnersService {
         throw err;
      }
   }
+
     this.loadWinners();
-  /* loadWinners! Для обновления UI через сервер - так чище! и логичней */
+
 }
 
   async getWinner(id: number): Promise<Winner & { car: Car }> {
