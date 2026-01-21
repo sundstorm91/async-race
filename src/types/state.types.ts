@@ -26,7 +26,7 @@ export interface WinnersState {
   isLoading: boolean;
 }
 
-export interface UIState {
+/* export interface UIState {
   activeView: 'garage' | 'winners';
   modals: {
     winner: {
@@ -42,6 +42,32 @@ export interface UIState {
     message: string;
     timeout: number;
   }>;
+} */
+
+  export interface UIState {
+  activeView: 'garage' | 'winners';
+  modals: {
+    winner: {
+      isOpen: boolean;
+      data: RaceWinner | null;
+    };
+    createCar: boolean;
+    updateCar: boolean;
+    confirm?: { // ← ДОБАВИТЬ
+      isOpen: boolean;
+      message: string;
+      onConfirm: () => void;
+      onCancel: () => void;
+    };
+  };
+  notifications: Array<{
+    id: string;
+    type: 'success' | 'error' | 'info';
+    message: string;
+    timeout: number;
+  }>;
+  isLoading?: boolean; // ← ДОБАВИТЬ (для global loading)
+  loadingMessage?: string; // ← ДОБАВИТЬ
 }
 
 export interface AppState {
@@ -75,11 +101,14 @@ export const initialState: AppState = {
   },
   ui: {
     activeView: 'garage',
-    modals: {
-      winner: { isOpen: false, data: null },
-      createCar: false,
-      updateCar: false
-    },
-    notifications: []
+  modals: {
+    winner: { isOpen: false, data: null },
+    createCar: false,
+    updateCar: false,
+    confirm: undefined // ← или null
+  },
+  notifications: [],
+  isLoading: false,
+  loadingMessage: undefined
   }
 };
