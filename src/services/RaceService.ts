@@ -35,13 +35,25 @@ export class RaceService implements IRaceService {
         private stateManager: StateManager<AppState>,
         private eventBus: EventBus,
         private engineApi: EngineApi,
-        private garageApi: GarageApi,
     ) {}
 
+    private stopAnimationForCar(carId: number):void {
+        const participant = this.stateManager.getState().race.participants.find(p => p.carId === carId);
+
+        if (participant?.animationId) {
+            cancelAnimationFrame(participant.animationId)
+        }
+    }
+
     async startSingleCar(carId: number): Promise<RaceResult> {
+        let engineStarted: boolean = false;
+
         try {
+
             const { distance , velocity } = await this.engineApi.startEngine(carId);
+            engineStarted = true;
             const driveResult = await this.engineApi.drive(carId);
+
 
             return {
 
@@ -53,6 +65,10 @@ export class RaceService implements IRaceService {
 
 
         } catch (err) {
+
+            if (engineStarted) {
+                await this.engineApi.stopEngine(carId).catch(() => {});
+            }
 
             if (err instanceof ApiError && err.status === 500) {
 
@@ -66,47 +82,88 @@ export class RaceService implements IRaceService {
         }
     }
 
+    async stopSingleCar(carId: number): Promise<void> {
+
+        await this.engineApi.stopEngine(carId)
+        this.stopAnimationForCar(carId)
+
+        this.stateManager.setState(prevState => ({
+            race: {
+                ...prevState.race,
+                participants: prevState.race.participants.map(p => p.carId === carId ? { ...p, status: 'stopped', animationId: undefined} : p)
+            }
+        }))
+    }
 
     async startRace(): Promise<RaceWinner | null> {
-    // 1. Берем участников
-    const cars = this.stateManager.getState().garage.cars;
+        // 1. Сброс
+        this.resetRace();
 
-    // 2. Запускаем всех параллельно
-    const promises = cars.map(car => this.startSingleCar(car.id));
-    const results = await Promise.all(promises);
+        // 2. Создаём участников из текущих машин
+        const cars = this.stateManager.getState().garage.cars;
+        const participants: RaceParticipant[] = cars.map(car => ({
+            carId: car.id,
+            car,
+            status: 'starting' as const,
+            startTime: Date.now()
+        }));
 
-    // 3. Находим победителя (первый успешный)
-    const winnerResult = results.find(r => r.success);
+        // 3. Начинаем гонку
+        this.stateManager.setState(prev => ({
+            race: {
+                ...prev.race,
+                status: 'racing',
+                participants
+            }
+        }));
 
-    if (!winnerResult) return null; // все сломались
+        this.eventBus.emit('race:started', { participants });
 
-    // 4. Возвращаем победителя
-    const winnerCar = cars.find(c => c.id === winnerResult.carId)!;
-    return {
-        car: winnerCar,
-        time: winnerResult.time!
-    };
+        // 4. Запускаем всех
+        const promises = participants.map(p => this.startSingleCar(p.carId));
+        const results = await Promise.all(promises);
 
+        // 5. Обновляем статусы участников по результатам
+        this.stateManager.setState(prev => ({
+            race: {
+                ...prev.race,
+                participants: prev.race.participants.map(p => {
+                    const result = results.find(r => r.carId === p.carId);
+                    return {
+                        ...p,
+                        status: result?.success ? 'finished' : 'broken',
+                        finishTime: result?.success ? Date.now() : undefined
+                    };
+                })
+            }
+        }));
+
+        // 6. Находим победителя
+        const winnerResult = results.find(r => r.success);
+        if (!winnerResult) {
+            this.stateManager.setState(prev => ({
+                race: { ...prev.race, status: 'finished' }
+            }));
+            return null;
+        }
+
+        const winnerCar = cars.find(c => c.id === winnerResult.carId)!;
+        const winner: RaceWinner = { car: winnerCar, time: winnerResult.time! };
+
+        this.stateManager.setState(prev => ({
+            race: {
+                ...prev.race,
+                status: 'finished',
+                winner
+            }
+        }));
+
+        this.eventBus.emit('race:finished', { winner });
+        return winner;
     }
 
     getParticipants(): RaceParticipant[] {
-        const cars = this.stateManager.getState().garage.cars;
-
-        const existingParticipant = this.stateManager.getState().race.participants;
-
-        return cars.map(car => {
-
-            const isExisting = existingParticipant.find(item => item.carId === car.id);
-
-            return {
-                car,
-                carId: car.id,
-                status: isExisting ? isExisting.status : 'idle',
-                startTime: isExisting?.startTime,
-                animationId: isExisting?.animationId,
-                finishTime: isExisting?.finishTime,
-            }
-        })
+        return this.stateManager.getState().race.participants;
     }
 
     getRaceStatus(): RaceStatus {
@@ -115,14 +172,6 @@ export class RaceService implements IRaceService {
 
     getWinner(): RaceWinner | null {
         return this.stateManager.getState().race.winner;
-    }
-
-    private stopAnimationForCar(carId: number):void {
-        const participant = this.stateManager.getState().race.participants.find(p => p.carId === carId);
-
-        if (participant?.animationId) {
-            cancelAnimationFrame(participant.animationId)
-        }
     }
 
     stopAllAnimations():void {
@@ -147,13 +196,7 @@ export class RaceService implements IRaceService {
 
     resetRace(): void {
 
-        this.stateManager.getState().race.participants.forEach(item => {
-
-            if (item.animationId) {
-                cancelAnimationFrame(item.animationId) /* requestAnimationFrame */
-            }
-
-        })
+        this.stopAllAnimations();
 
         const promises = this.stateManager.getState().race.participants.map(participant => this.engineApi.stopEngine(participant.carId).catch(()=>{}));
 
@@ -173,19 +216,6 @@ export class RaceService implements IRaceService {
 
     calculateRaceTime(velocity: number, distance: number): number {
         return Math.round(distance / velocity)
-    }
-
-    async stopSingleCar(carId: number): Promise<void> {
-        const singleCar = await this.garageApi.getCar(carId);
-        await this.engineApi.stopEngine(singleCar.id)
-        this.stopAnimationForCar(carId)
-
-        this.stateManager.setState(prevState => ({
-            race: {
-                ...prevState.race,
-                participants: prevState.race.participants.map(p => p.carId === carId ? { ...p, status: 'stopped', animationId: undefined} : p)
-            }
-        }))
     }
 
 
