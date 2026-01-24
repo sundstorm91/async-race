@@ -233,7 +233,7 @@ export class GarageView implements IGarageView {
         return container;
     }
 
-        // Обновление при изменении стейта
+    // Обновление при изменении стейта
     private update(): void {
 
         try {
