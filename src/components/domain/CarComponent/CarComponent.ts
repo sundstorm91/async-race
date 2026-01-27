@@ -3,8 +3,7 @@ import { Button } from '../../Button/Button';
 
 export class CarComponent {
   private element: HTMLDivElement;
-  private carSvg: SVGSVGElement;
-  /* private carImage: HTMLDivElement; */
+  private carImage: HTMLDivElement;
   private nameElement: HTMLSpanElement;
   private selectButton: Button;
   private removeButton: Button;
@@ -13,7 +12,7 @@ export class CarComponent {
 
   constructor(props: CarProps) {
     this.element = document.createElement('div');
-    this.element.className = `car ${props.isSelected ? 'car--selected' : ''} ${props.isRacing ? 'car--racing' : ''}`; /* ! */
+    this.element.className = `car ${props.isSelected ? 'car--selected' : ''} ${props.isRacing ? 'car--racing' : ''}`;
 
     // Информация о машине
     const info = document.createElement('div');
@@ -23,6 +22,11 @@ export class CarComponent {
     this.nameElement.textContent = props.car.name;
     this.nameElement.className = 'car-name';
     info.appendChild(this.nameElement);
+
+    const colorIndicator = document.createElement('div');
+    colorIndicator.className = 'car-color';
+    colorIndicator.style.backgroundColor = props.car.color;
+    info.appendChild(colorIndicator);
 
     this.element.appendChild(info);
 
@@ -67,140 +71,111 @@ export class CarComponent {
 
     this.element.appendChild(controls);
 
-    const carImageContainer = document.createElement('div');
-    carImageContainer.className = 'car-image-container';
-    carImageContainer.style.transform = `translateX(${props.position || 0}%)`
-    // Создаем SVG элемент
-    this.carSvg = this.createCarSvg(props.car.color);
-    carImageContainer.appendChild(this.carSvg);
+    // Изображение машины
+    this.carImage = document.createElement('div');
+    this.carImage.className = 'car-image';
 
-    this.element.appendChild(carImageContainer);
+const carSVG = (color: string): string => {
+  return `
+    <svg width="100" height="50" viewBox="0 0 1280 640" xmlns="http://www.w3.org/2000/svg">
+      <g transform="translate(0,640) scale(0.1,-0.1)">
+        <!-- Сначала рисуем основной контур машины -->
+        <path d="M3525 5341 c-72 -18 -79 -28 -90 -121 -4 -30 -11 -62 -16 -71 -4 -9
+        -97 -51 -206 -94 -774 -304 -1348 -540 -1603 -661 -163 -77 -222 -91 -421
+        -104 -85 -5 -170 -14 -189 -20 -101 -32 -362 -58 -620 -63 l-115 -2 -47 -80
+        c-47 -78 -47 -80 -29 -100 34 -36 35 -77 5 -177 -30 -99 -34 -178 -19 -370 5
+        -67 4 -88 -6 -88 -29 0 -83 -56 -110 -114 -50 -106 -74 -343 -48 -467 13 -58
+        13 -62 3 -159 -5 -54 16 -238 28 -244 2 -1 29 -20 61 -41 73 -49 123 -103 132
+        -143 17 -79 167 -155 355 -181 104 -15 969 -97 1087 -104 l32 -2 5 160 c7 230
+        50 394 146 559 281 479 917 673 1405 429 316 -159 530 -424 598 -742 22 -106
+        29 -365 13 -519 l-8 -82 3002 0 c2855 0 3002 1 2995 18 -33 87 -56 325 -45
+        461 28 320 177 567 459 759 399 273 847 282 1243 24 239 -157 397 -392 460
+        -687 18 -84 15 -341 -5 -430 -8 -38 -14 -71 -12 -73 7 -8 386 20 478 34 180
+        28 253 65 304 152 24 41 28 57 28 127 -1 44 -9 117 -20 163 -18 79 -18 88 -2
+        190 31 199 40 306 41 497 1 176 -1 195 -23 260 -46 135 -103 190 -283 274
+        -222 104 -633 220 -1168 330 -523 108 -1524 210 -2054 211 l-229 0 -236 139
+        c-813 477 -1593 884 -1852 966 -498 157 -1598 195 -2892 100 l-188 -14 -47 30
+        c-92 58 -223 89 -297 70z"
+        fill="${color}" stroke="none"/>
 
+        <!-- Окна/детали (меняем цвет на более светлый) -->
+        <path d="M2617 3125 c-431 -82 -774 -440 -838 -875 -17 -117 -7 -292 24 -410
+        113 -436 497 -751 947 -777 507 -29 959 313 1076 813 28 117 26 348 -4 467
+        -94 378 -383 670 -760 768 -105 27 -336 34 -445 14z"
+        fill="#E0F7FA" opacity="0.7" stroke="none"/>
+
+        <!-- Теперь рисуем КОЛЕСА ПОВЕРХ корпуса -->
+        <!-- Левое переднее колесо (первое, которое не видно) -->
+        <path d="M2786 2354 c-36 -35 0 -87 44 -64 26 14 26 56 1 70 -25 13 -27 13 -45 -6z"
+        fill="#000000" stroke="none"/>
+
+        <!-- Главное левое колесо -->
+        <path d="M2751 2186 c-57 -32 -68 -111 -22 -157 43 -42 101 -43 143 -1 42 42
+        41 100 -1 143 -33 32 -78 38 -120 15z"
+        fill="#000000" stroke="none"/>
+
+        <!-- Левое заднее колесо -->
+        <path d="M2560 2136 c-19 -23 -8 -61 18 -64 44 -7 67 32 36 62 -19 20 -38 20 -54 2z"
+        fill="#000000" stroke="none"/>
+
+        <!-- Правое заднее колесо -->
+        <path d="M3002 2124 c-27 -19 -28 -36 -3 -58 25 -23 61 -6 61 29 0 33 -30 49 -58 29z"
+        fill="#000000" stroke="none"/>
+
+        <!-- Еще одно левое колесо -->
+        <path d="M2776 1914 c-19 -18 -19 -20 -6 -45 6 -11 21 -19 35 -19 20 0 45 24
+        45 44 0 10 -32 36 -45 36 -7 0 -21 -7 -29 -16z"
+        fill="#000000" stroke="none"/>
+
+        <!-- Правая сторона машины -->
+        <!-- Правое переднее колесо (большое) -->
+        <path d="M10723 3125 c-318 -58 -597 -266 -743 -555 -223 -441 -98 -996 289
+        -1288 112 -84 188 -125 311 -166 274 -91 545 -70 802 61 552 282 735 983 392
+        1500 -225 339 -651 521 -1051 448z m385 -315 c348 -98 579 -443 532 -796 -67
+        -508 -596 -796 -1055 -574 -239 116 -396 352 -412 620 -20 335 192 640 516
+        745 122 40 289 42 419 5z"
+        fill="#000000" stroke="none"/>
+
+        <!-- Правое колесо (диск) -->
+        <path d="M10888 2359 c-24 -14 -23 -56 2 -69 44 -23 80 29 44 64 -18 19 -23 19 -46 5z"
+        fill="#000000" stroke="none"/>
+
+        <!-- Правое главное колесо -->
+        <path d="M10851 2187 c-49 -29 -66 -101 -35 -146 9 -13 32 -29 50 -37 29 -12
+        39 -12 68 0 99 41 85 180 -19 192 -24 3 -50 -1 -64 -9z"
+        fill="#000000" stroke="none"/>
+
+        <!-- Правое заднее колесо -->
+        <path d="M10660 2136 c-19 -23 -8 -61 18 -64 44 -7 67 32 36 62 -19 20 -38 20 -54 2z"
+        fill="#000000" stroke="none"/>
+
+        <!-- Еще одно правое колесо -->
+        <path d="M11096 2124 c-9 -8 -16 -22 -16 -29 0 -13 26 -45 36 -45 20 0 44 25
+        44 45 0 14 -8 29 -19 35 -25 13 -27 13 -45 -6z"
+        fill="#000000" stroke="none"/>
+
+        <!-- Последнее правое колесо -->
+        <path d="M10870 1910 c-16 -31 4 -62 38 -58 21 2 28 9 30 32 5 45 -47 65 -68 26z"
+        fill="#000000" stroke="none"/>
+
+        <!-- Дополнительные детали окон/фар -->
+        <path d="M2918 2568 c2 -90 7 -167 12 -172 17 -17 108 58 201 166 l51 57 -48
+        31 c-52 33 -131 65 -185 75 l-34 6 3 -163z"
+        fill="#000000" stroke="none"/>
+
+        <path d="M3209 2355 c-57 -64 -105 -123 -107 -131 -6 -25 46 -35 157 -29 58 3
+        121 8 139 11 33 5 34 6 27 42 -7 44 -64 167 -92 201 l-19 24 -105 -118z"
+        fill="#000000" stroke="none"/>
+      </g>
+    </svg>
+  `;
+};
+
+    this.carImage.innerHTML = carSVG(props.car.color);
+    /* this.carImage.style.backgroundColor = props.car.color; */
+    this.carImage.style.transform = `translateX(${props.position || 0}%)`;
+    this.element.appendChild(this.carImage);
   }
-
-  private createCarSvg(color: string): SVGSVGElement {
-  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute('viewBox', '0 0 100 50');
-  svg.setAttribute('class', 'car-svg');
-
-  // Основной кузов
-  const body = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-  body.setAttribute('d', 'M10 35 Q15 20 25 20 L75 20 Q85 20 90 35 Q85 45 75 45 L25 45 Q15 45 10 35');
-  body.setAttribute('fill', color);
-  body.setAttribute('stroke', '#000');
-  body.setAttribute('stroke-width', '1');
-
-  // Верхняя часть
-  const top = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-  top.setAttribute('d', 'M30 20 L70 20 Q75 22 78 25 L22 25 Q25 22 30 20');
-  top.setAttribute('fill', color);
-  top.setAttribute('opacity', '0.8');
-
-  // Окна
-  const window1 = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-  window1.setAttribute('x', '32');
-  window1.setAttribute('y', '22');
-  window1.setAttribute('width', '15');
-  window1.setAttribute('height', '8');
-  window1.setAttribute('rx', '2');
-  window1.setAttribute('fill', '#87CEEB');
-  window1.setAttribute('opacity', '0.7');
-
-  const window2 = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-  window2.setAttribute('x', '53');
-  window2.setAttribute('y', '22');
-  window2.setAttribute('width', '15');
-  window2.setAttribute('height', '8');
-  window2.setAttribute('rx', '2');
-  window2.setAttribute('fill', '#87CEEB');
-  window2.setAttribute('opacity', '0.7');
-
-  // Колеса с дисками
-  const wheel1 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-  wheel1.setAttribute('cx', '25');
-  wheel1.setAttribute('cy', '40');
-  wheel1.setAttribute('r', '7');
-  wheel1.setAttribute('fill', '#333');
-
-  const wheel2 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-  wheel2.setAttribute('cx', '75');
-  wheel2.setAttribute('cy', '40');
-  wheel2.setAttribute('r', '7');
-  wheel2.setAttribute('fill', '#333');
-
-  // Спицы колес
-  const spokes1 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-  spokes1.setAttribute('cx', '25');
-  spokes1.setAttribute('cy', '40');
-  spokes1.setAttribute('r', '4');
-  spokes1.setAttribute('fill', 'none');
-  spokes1.setAttribute('stroke', '#AAA');
-  spokes1.setAttribute('stroke-width', '1.5');
-  spokes1.setAttribute('stroke-dasharray', '2, 4');
-
-  const spokes2 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-  spokes2.setAttribute('cx', '75');
-  spokes2.setAttribute('cy', '40');
-  spokes2.setAttribute('r', '4');
-  spokes2.setAttribute('fill', 'none');
-  spokes2.setAttribute('stroke', '#AAA');
-  spokes2.setAttribute('stroke-width', '1.5');
-  spokes2.setAttribute('stroke-dasharray', '2, 4');
-
-  // Фара
-  const headlight = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-  headlight.setAttribute('cx', '92');
-  headlight.setAttribute('cy', '32');
-  headlight.setAttribute('r', '3');
-  headlight.setAttribute('fill', '#FFD700');
-  headlight.setAttribute('filter', 'url(#glow)');
-
-  // Добавляем градиент для блеска
-  const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-  const gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
-  gradient.setAttribute('id', 'carGradient');
-  gradient.setAttribute('x1', '0%');
-  gradient.setAttribute('y1', '0%');
-  gradient.setAttribute('x2', '100%');
-  gradient.setAttribute('y2', '100%');
-
-  const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
-  stop1.setAttribute('offset', '0%');
-  stop1.setAttribute('stop-color', color);
-
-  const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
-  stop2.setAttribute('offset', '100%');
-  stop2.setAttribute('stop-color', this.darkenColor(color, 20));
-
-  gradient.appendChild(stop1);
-  gradient.appendChild(stop2);
-  defs.appendChild(gradient);
-
-  // Применяем градиент к кузову
-  body.setAttribute('fill', 'url(#carGradient)');
-
-  svg.appendChild(defs);
-  svg.appendChild(body);
-  svg.appendChild(top);
-  svg.appendChild(window1);
-  svg.appendChild(window2);
-  svg.appendChild(wheel1);
-  svg.appendChild(wheel2);
-  svg.appendChild(spokes1);
-  svg.appendChild(spokes2);
-  svg.appendChild(headlight);
-
-  return svg;
-}
-
-// Вспомогательный метод для затемнения цвета
-private darkenColor(color: string, percent: number): string {
-  // Простая реализация затемнения hex цвета
-  // В реальном проекте лучше использовать библиотеку
-  return color; // Заглушка
-}
-
-
 
   update(props: Partial<CarProps>): void {
     if (props.car?.name !== undefined) {
@@ -208,7 +183,7 @@ private darkenColor(color: string, percent: number): string {
     }
 
     if (props.car?.color !== undefined) {
-      this.carSvg.style.backgroundColor = props.car.color;
+      this.carImage.style.backgroundColor = props.car.color;
     }
 
     if (props.isSelected !== undefined) {
@@ -222,7 +197,7 @@ private darkenColor(color: string, percent: number): string {
     }
 
     if (props.position !== undefined) {
-      this.carSvg.style.transform = `translateX(${props.position}%)`;
+      this.carImage.style.transform = `translateX(${props.position}%)`;
     }
   }
 
