@@ -26,23 +26,6 @@ export interface WinnersState {
   isLoading: boolean;
 }
 
-/* export interface UIState {
-  activeView: 'garage' | 'winners';
-  modals: {
-    winner: {
-      isOpen: boolean;
-      data: RaceWinner | null;
-    };
-    createCar: boolean;
-    updateCar: boolean;
-  };
-  notifications: Array<{
-    id: string;
-    type: 'success' | 'error' | 'info';
-    message: string;
-    timeout: number;
-  }>;
-} */
 
   export interface UIState {
   activeView: 'garage' | 'winners';

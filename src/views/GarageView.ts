@@ -255,10 +255,10 @@ export class GarageView implements IGarageView {
 
             this.root.append(
                 this.renderHeader(),
-                this.renderCarList(),
-                this.renderControls(),
                 this.renderPagination(),
                 this.renderCreateForm(),
+                this.renderControls(),
+                this.renderCarList(),
             )
 
         } catch (err) {

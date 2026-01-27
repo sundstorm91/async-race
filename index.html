@@ -1,37 +1,14 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>async-race</title>
-  </head>
-  <body>
-    <!-- <div id="app"></div> -->
-
-     <header class="header">
-        <h1>Async Race</h1>
-        <nav class="tabs">
-            <button id="garage-tab" class="tab active">Garage</button>
-            <button id="winners-tab" class="tab">Winners</button>
-        </nav>
-    </header>
-
-    <main class="main-content">
-        <!-- Garage View -->
-        <section id="garage-view" class="view active">
-            <div id="garage-container"></div>
-        </section>
-
-        <!-- Winners View -->
-        <section id="winners-view" class="view">
-            <div id="winners-container"></div>
-        </section>
-    </main>
-
-    <!-- Модалка победителя -->
-    <div id="winner-modal" class="modal" style="display: none;"></div>
-
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="stylesheet" href="/src/styles.css">
+    <title>Async Race</title>
+</head>
+<body>
+    <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>
-  </body>
+</body>
 </html>
