@@ -5,7 +5,7 @@ import type { StateManager } from "../core/state-manager";
 import type { GarageService } from "../services/GarageService";
 import type { RaceService } from "../services/RaceService";
 import type { UIService } from "../services/UiService";
-import type { AppState, Car } from "../types";
+import type { AppState, Car, RaceParticipant } from "../types";
 
 interface IGarageView {
     mount(container: HTMLElement): void;
@@ -16,6 +16,7 @@ export class GarageView implements IGarageView {
     private prevCars: Car[] = [];
     private prevPageInfo = { page: 0, totalPages: 0 };
     private prevTotalCars = 0;
+    private prevRaceParticipants: RaceParticipant[] = [];
 
     private root: HTMLDivElement;
     private unsubscribe: () => void;
@@ -32,6 +33,8 @@ export class GarageView implements IGarageView {
         /* подписываемся на изменение стейта */
 
         this.unsubscribe = stateManager.subscribe(() => {
+            console.log('🔄 GarageView: State changed!');
+            console.log('Race participants:', this.stateManager.getState().race.participants);
             this.update()
         })
     }
@@ -234,22 +237,23 @@ export class GarageView implements IGarageView {
     }
 
     // Обновление при изменении стейта
-    private update(): void {
+   private update(): void {
 
         try {
             const state = this.stateManager.getState();
-
             const carsChanged = this.prevCars !== state.garage.cars;
             const pageChanged = this.prevPageInfo.page !== state.garage.pagination.page ||
                 this.prevPageInfo.totalPages !== state.garage.pagination.totalPages;
             const totalChanged = this.prevTotalCars !== state.garage.pagination.total;
+            const participantChanged = this.prevRaceParticipants !== state.race.participants
 
-            if (!carsChanged && !pageChanged && !totalChanged) return;
+            if (!carsChanged && !pageChanged && !totalChanged && !participantChanged) return;
 
             this.prevCars = state.garage.cars;
             this.prevPageInfo.page = state.garage.pagination.page;
             this.prevPageInfo.totalPages = state.garage.pagination.totalPages;
             this.prevTotalCars = state.garage.pagination.total;
+            this.prevRaceParticipants = state.race.participants;
 
             this.root.innerHTML = '';
 
@@ -266,6 +270,10 @@ export class GarageView implements IGarageView {
             this.uiService.showNotification('Render Error', 'error')
         }
     }
+
+
+
+
 
     mount(container: HTMLElement): void {
         // Загружаем машины при первом монтировании
