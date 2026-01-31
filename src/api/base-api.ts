@@ -35,29 +35,23 @@ export abstract class BaseApi {
   response: Response,
   readHeaders?: boolean
 ): Promise<T> {
-  console.log('🔍 handleResponse вызван');
-  console.log('readHeaders:', readHeaders);
-  console.log('URL:', response.url);
+
 
   if (!response.ok) {
     throw this.createError('Request failed', response.status, response.url);
   }
 
   const data = await response.json();
-  console.log('📦 Raw data:', data);
-  console.log('📦 Type of data:', typeof data);
-  console.log('📦 Is array?:', Array.isArray(data));
+
 
   if (readHeaders) {
     const total = response.headers.get('X-Total-Count');
-    console.log('📊 X-Total-Count header:', total);
+
 
     const result = {
       cars: data,           // предполагаем что data массив
       total: Number(total)
     };
-
-    console.log('📤 Returning:', result);
     return result as T;
   }
 
