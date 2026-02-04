@@ -26,13 +26,12 @@ export class EngineApi extends BaseApi implements IEngineApi {
     }
 
     async drive(id: number): Promise<{ success: boolean; }> {
+
       try {
         await this.patch('/engine', {
           id,
           status: 'drive'
         })
-
-        console.log(`🚗 Машина ${id} успешно доехала`);
 
         return { success: true }
 

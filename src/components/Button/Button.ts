@@ -54,7 +54,7 @@ export class Button {
       type: (typeMatch?.[1] as ButtonProps['type']) || 'primary',
       size: (sizeMatch?.[1] as ButtonProps['size']) || 'medium',
       disabled: this.element.disabled,
-      onClick: () => {} // будет переопределено
+      onClick: () => {}
     };
   }
 }

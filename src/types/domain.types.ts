@@ -27,6 +27,10 @@ export interface RaceParticipant { // Участник гонки ID
   finishTime?: number; // timestamp финиша
   animationId?: number; // ID анимации для отмены
   position?: number;
+  engineData?: {
+      velocity: number;
+      distance: number;
+  },
 }
 
 export type RaceStatus = 'idle' | 'preparing' | 'racing' | 'finished'; // статусы гонки, для остлеживания состояния.

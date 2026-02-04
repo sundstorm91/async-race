@@ -54,8 +54,6 @@ export abstract class BaseApi {
     };
     return result as T;
   }
-
-  console.log('📤 Returning raw data:', data);
   return data as T;
 }
 

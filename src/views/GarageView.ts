@@ -33,8 +33,7 @@ export class GarageView implements IGarageView {
         /* подписываемся на изменение стейта */
 
         this.unsubscribe = stateManager.subscribe(() => {
-            console.log('🔄 GarageView: State changed!');
-            console.log('Race participants:', this.stateManager.getState().race.participants);
+
             this.update()
         })
     }
@@ -132,7 +131,7 @@ export class GarageView implements IGarageView {
     container.appendChild(updateButton.render());
 
     return container;
-}
+    }
 
     private renderControls(): HTMLElement {
         const container = document.createElement('div');
