@@ -110,7 +110,7 @@ export class RaceService {
                     race: {
                         ...prevState.race,
                         participants: prevState.race.participants.map(p => p.carId === carId ? {
-                            ...p, position: progress* 100,
+                            ...p, position: progress*100,
                         } : p)
                     }
                 }))
@@ -161,16 +161,9 @@ export class RaceService {
 
                 if (!animationInfo) return;
                 cancelAnimationFrame(animationInfo.animationId)
-                this.animationsId.delete(animationInfo.animationId)
+                this.animationsId.delete(carId)
 
-                this.engineApi.stopEngine(carId);
-
-                this.stateManager.setState(prevState => ({
-                    race: {
-                        ...prevState.race,
-                        participants: prevState.race.participants.map(p => p.carId === carId ? { ...p, status: 'broken'} : p)
-                    }
-                }))
+                this.markCarAsBroken(carId)
 
                 return { success: false }
            }
@@ -178,14 +171,25 @@ export class RaceService {
            if (result.type === 'drive_result' && result.success) {
 
                 await animationPromise;
-                return { success: true, time: duration }
+                this.animationsId.delete(carId);
+                this.markCarAsFinished(carId)
+
+                return { success: true, time: duration / 1000 }
            }
 
            if (result.type === 'animation_complete') {
+                console.log('a-complete!')
                 const driveResult = await drivePromise;
-                if (driveResult.type === 'drive-result') {
-                    return { success: driveResult.success }
+                this.animationsId.delete(carId);
+                if (driveResult.type === 'drive_result' && driveResult.success) {
+
+                    this.markCarAsFinished(carId)
+
+                    console.log('закончили успешно')
+                    return { success: driveResult.success, time: duration / 1000  }
                 } else {
+                    this.markCarAsBroken(carId)
+                    console.log('закончили НЕ успешно')
                     return { success: false }
                 }
            }
@@ -236,6 +240,32 @@ export class RaceService {
 
     calculateRaceTime(velocity: number, distance: number): number {
         return Math.round(distance / velocity)
+    }
+
+    private markCarAsFinished(carId: number) {
+
+        this.stateManager.setState(prev => ({
+            race: {
+                ...prev.race,
+                participants: prev.race.participants.map(p =>
+                    p.carId === carId ? { ...p, status: 'finished' } : p
+                )
+            }
+            }));
+        this.engineApi.stopEngine(carId).catch(() => {});
+    }
+
+    private markCarAsBroken(carId: number) {
+        this.stateManager.setState(prev => ({
+                    race: {
+                        ...prev.race,
+                        participants: prev.race.participants.map(p =>
+                        p.carId === carId ? { ...p, status: 'broken' } : p
+                        )
+                    }
+                }));
+
+        this.engineApi.stopEngine(carId).catch(() => {});
     }
 
 
