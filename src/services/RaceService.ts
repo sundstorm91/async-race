@@ -173,7 +173,7 @@ export class RaceService {
                 await animationPromise;
                 this.animationsId.delete(carId);
                 this.markCarAsFinished(carId)
-
+                console.log('drive_result && result.success')
                 return { success: true, time: duration / 1000 }
            }
 
@@ -198,7 +198,14 @@ export class RaceService {
 
 
 
-    stopSingleCar(carId: number) {}
+    stopSingleCar(carId: number) {
+        const animationInfo = this.animationsId.get(carId);
+        if (!animationInfo) return;
+
+        cancelAnimationFrame(animationInfo.animationId)
+        this.animationsId.delete(carId)
+        this.markCarAsStopped(carId);
+    }
 
     startRace() {};
 
@@ -243,7 +250,7 @@ export class RaceService {
     }
 
     private markCarAsFinished(carId: number) {
-
+        this.engineApi.stopEngine(carId).catch(() => {});
         this.stateManager.setState(prev => ({
             race: {
                 ...prev.race,
@@ -252,10 +259,10 @@ export class RaceService {
                 )
             }
             }));
-        this.engineApi.stopEngine(carId).catch(() => {});
     }
 
     private markCarAsBroken(carId: number) {
+        this.engineApi.stopEngine(carId).catch(() => {});
         this.stateManager.setState(prev => ({
                     race: {
                         ...prev.race,
@@ -264,10 +271,19 @@ export class RaceService {
                         )
                     }
                 }));
-
-        this.engineApi.stopEngine(carId).catch(() => {});
     }
 
+    private markCarAsStopped(carId: number) {
+        this.engineApi.stopEngine(carId).catch(() => {});
+        this.stateManager.setState(prev => ({
+                    race: {
+                        ...prev.race,
+                        participants: prev.race.participants.map(p =>
+                        p.carId === carId ? { ...p, status: 'stopped' } : p
+                        )
+                    }
+                }));
+    }
 
 }
 
