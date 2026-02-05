@@ -196,8 +196,6 @@ export class RaceService {
 
     }
 
-
-
     stopSingleCar(carId: number) {
         const animationInfo = this.animationsId.get(carId);
         if (!animationInfo) return;
@@ -207,7 +205,10 @@ export class RaceService {
         this.markCarAsStopped(carId);
     }
 
-    startRace() {};
+    async startRace(): Promise<RaceWinner | null> {
+
+
+    };
 
     getParticipants(): RaceParticipant[] {
         return this.stateManager.getState().race.participants;
@@ -225,12 +226,9 @@ export class RaceService {
     resetRace(): void {
 
         this.stopAllAnimations();
-
-        const promises = this.stateManager.getState().race.participants.map(participant => this.engineApi.stopEngine(participant.carId).catch(()=>{}));
-
+        const promises = this.stateManager.getState().race.participants.map(p => this.engineApi.stopEngine(p.carId).catch(()=>{}));
         Promise.all(promises).catch(()=>{})
-
-        this.stateManager.setState(prevState => ({
+        this.stateManager.setState ({
             race: {
                 results: [],
                 winner: null,
@@ -238,10 +236,8 @@ export class RaceService {
                 status: 'idle',
 
             }
-        }))
-
-        this.animations.clear();
-        this.finishedCars.clear();
+        })
+        /* this.finishedCars.clear();  => проверить! */
         this.eventBus.emit('race:reset')
     }
 
@@ -283,6 +279,11 @@ export class RaceService {
                         )
                     }
                 }));
+    }
+
+    private stopAllAnimations() {
+        this.animationsId.forEach(a => cancelAnimationFrame(a.animationId))
+        this.animationsId.clear();
     }
 
 }
