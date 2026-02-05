@@ -2,6 +2,8 @@ import type { EngineApi } from "../api";
 import type { EventBus } from "../core";
 import type { StateManager } from "../core/state-manager";
 import {  type AppState, type EngineStatus, type RaceParticipant, type RaceStatus, type RaceWinner } from "../types"
+import type { UIService } from "./UiService";
+import type { WinnerService } from "./WinnersService";
 
 /* interface RaceResult {
   carId: number;
@@ -40,12 +42,14 @@ export class RaceService {
         startTime: number;
         animationId: number;
     }> = new Map();
-    private finishedCars: Map<number, number> = new Map();
 
     constructor(
         private stateManager: StateManager<AppState>,
         private eventBus: EventBus,
         private engineApi: EngineApi,
+        private winnersService: WinnerService,
+        private uiService: UIService,
+
     ) {}
 
     private calculateAnimationDuration (distance: number, velocity: number): number {
@@ -206,7 +210,60 @@ export class RaceService {
     }
 
     async startRace(): Promise<RaceWinner | null> {
+        this.resetRace();
 
+        /* установка в режим гонки */
+
+        this.stateManager.setState(prevState => ({
+            race: {
+                ...prevState.race, status: 'racing'
+            }
+        }))
+
+        const cars = this.stateManager.getState().garage.cars;
+
+        const promises = cars.map(car => this.startSingleCar(car.id).then(r => ({
+            success: r?.success,
+            time: r?.time,
+            carId: car.id,
+
+        })));
+
+        const results = await Promise.all(promises);
+
+        const sucessfullyResults = results.filter(r => r?.success && r.time !== undefined);
+        console.log(sucessfullyResults)
+
+        if (sucessfullyResults.length === 0) return null;
+
+        const winnerResult = sucessfullyResults.reduce((fast, current) => current.time! < fast.time! ? current : fast);
+
+        const winnerCar = this.stateManager.getState().garage.cars.find(car => car.id === winnerResult.carId);
+
+        if (!winnerCar) {
+            console.error(`Winner car ${winnerCar} not found in garage`)
+            return null;
+        }
+
+        const raceWinner:  RaceWinner = {
+            car: winnerCar,
+            time: winnerResult.time!
+        }
+
+        this.stateManager.setState(prevState => ({
+            race: {
+                ...prevState.race,
+                status: 'finished',
+                winner: raceWinner,
+            }
+        }))
+
+        this.winnersService.addWinner(raceWinner);
+        this.uiService.showWinnerModal(raceWinner);
+
+        cars.forEach(car => this.engineApi.stopEngine(car.id));
+
+        return raceWinner;
 
     };
 
