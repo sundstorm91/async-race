@@ -8,7 +8,7 @@ interface IWinnersApi {
     limit: number,
     sort: 'id' | 'wins' | 'time',
     order: 'ASC' | 'DESC'
-  ): Promise<{ winners: Winner[]; total: number }>;
+  ): Promise<{ cars: Winner[]; total: number }>;
 
   getWinner(id: number): Promise<Winner>;
   createWinner(winner: Omit<Winner, 'id'>): Promise<Winner>;
@@ -41,7 +41,7 @@ export class WinnersApi extends BaseApi implements IWinnersApi {
        return this.get(`/winners/${id}`)
     }
 
-    getWinners(page?: number, limit?: number, sort: "id" | "wins" | "time" = 'id', order: "ASC" | "DESC" = 'ASC'): Promise<{ winners: Winner[]; total: number; }> {
+    getWinners(page?: number, limit?: number, sort: "id" | "wins" | "time" = 'id', order: "ASC" | "DESC" = 'ASC'): Promise<{ cars: Winner[]; total: number; }> {
       return this.get(`/winners`, {
         _page: page,
         _limit: limit,

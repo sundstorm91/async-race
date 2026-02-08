@@ -222,12 +222,23 @@ export class RaceService {
 
         const cars = this.stateManager.getState().garage.cars;
 
-        const promises = cars.map(car => this.startSingleCar(car.id).then(r => ({
-            success: r?.success,
-            time: r?.time,
-            carId: car.id,
+        const promises = cars.map(car =>
 
-        })));
+            this.startSingleCar(car.id).then(r => {
+                console.log('Результат для машины', car.id, ':', r);
+
+                if (!r) {
+                    console.error('Результат undefined для машины', car.id);
+                    return { success: false, carId: car.id };
+                }
+
+                return {
+                    success: r.success,
+                    time: r.time,
+                    carId: car.id,
+                };
+            })
+        );
 
         const results = await Promise.all(promises);
 
@@ -249,6 +260,7 @@ export class RaceService {
             car: winnerCar,
             time: winnerResult.time!
         }
+        console.log('сформирован победитель (race-service)')
 
         this.stateManager.setState(prevState => ({
             race: {
@@ -259,7 +271,8 @@ export class RaceService {
         }))
 
         this.winnersService.addWinner(raceWinner);
-        this.uiService.showWinnerModal(raceWinner);
+
+        /* this.uiService.showWinnerModal(raceWinner); */
 
         cars.forEach(car => this.engineApi.stopEngine(car.id));
 

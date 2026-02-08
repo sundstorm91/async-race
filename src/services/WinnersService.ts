@@ -4,10 +4,9 @@ import type { StateManager } from "../core/state-manager"
 import { ApiError, type AppState, type Car, type RaceWinner, type SortOptions, type Winner } from "../types"
 
 interface IWinnersService {
-  loadWinners(page: number, sort: SortOptions): Promise<void>
+  loadWinners(page: number): Promise<void>
   getWinner(id: number): Promise<Winner & { car: Car }>
-  addWinner(winner: RaceWinner): Promise<void> // После гонки
-  /* updateExistingWinner(id: number, wins: number, time: number) */
+  addWinner(winner: RaceWinner): Promise<void>
   deleteWinner(id: number): Promise<void>
 }
 
@@ -27,47 +26,32 @@ export class WinnerService implements IWinnersService {
   )
   {}
 
-  private async updateExistingWinner(id: number, newTime: number) {
-        const existing = await this.winnersApi.getWinner(id);
-        return this.winnersApi.updateWinner(id, {
-            wins: existing.wins + 1,
-            time: Math.min(existing.time, newTime)
-        });
-    }
 
   async addWinner(winner: RaceWinner): Promise<void> {
+      const data = await this.winnersApi.getWinner(winner.car.id);
+      console.log(data.time, data.wins)
+      const isExistingWinner = data.time !== null && data.time !== undefined && data.wins !== null && data.wins !== undefined;
 
-     try {
+      console.log(`isExist - ${isExistingWinner}`)
 
-      await this.updateExistingWinner(winner.car.id, winner.time);
+      if (isExistingWinner) {
 
-      this.eventBus.emit('winner:updated', { winner })
+          await this.winnersApi.updateWinner(winner.car.id, {
+            wins: data.wins + 1,
+            time: Math.min(data.time, winner.time)
+          })
 
-     } catch (err) {
+      } else {
 
-      if (err instanceof ApiError && err.status === 404) {
+            await this.winnersApi.updateWinner(winner.car.id, {
+              wins: 1,
+              time: winner.time
+          });
+      }
 
-        await this.winnersApi.createWinner({
-          id: winner.car.id,
-          time: winner.time,
-          wins: 1,
-        })
+      this.loadWinners();
 
-        this.eventBus.emit('winner:created', { winner })
-
-
-     } else {
-
-        /* Обработать другие кейсы ошибок! */
-
-        console.error('Failed to create winner', err)
-        throw err;
-     }
   }
-
-    this.loadWinners();
-
-}
 
   async getWinner(id: number): Promise<Winner & { car: Car }> {
     const currentWinner = await this.winnersApi.getWinner(id);
@@ -91,60 +75,30 @@ export class WinnerService implements IWinnersService {
   }
 
   async loadWinners(page: number = 1): Promise<void> {
+      const winnersApi = await this.winnersApi.getWinners();
 
-      const sort = this.stateManager.getState().winners.sort;
-
-      this.stateManager.setState(prevState => ({
-        winners: {...prevState.winners, isLoading: true  }
-      }))
-
-      try {
-
-        const { winners: ApiWinners, total } = await this.winnersApi.getWinners(
-        page,
-        10,
-        sort.field,
-        sort.order,
-      );
+      const validWinners = winnersApi.cars.filter(winner =>
+        winner.wins != null &&
+        winner.time != null &&
+        winner.wins > 0 &&       // ← дополнительная проверка
+        winner.time > 0
+    );
 
       const winnersWithCars = await Promise.all(
-        ApiWinners.map(async(winner) => ({
+        validWinners.map(async(winner) => ({
             ...winner,
             car: await this.garageApi.getCar(winner.id)
         }))
-      )
+    );
 
-      this.stateManager.setState(prevState => ({
-
-        winners: {
-          ...prevState.winners,
-          isLoading: false,
-          winners: winnersWithCars,
-          sort,
-          pagination: {
-            ...prevState.winners.pagination,
-            page,
-            total,
-            totalPages: Math.ceil(total / prevState.winners.pagination.limit)
-        },
-
-        }
-      }))
-
-      } catch (err) {
-
-          this.stateManager.setState(prev => ({
-            winners: {
-                ...prev.winners,
-                isLoading: false,
-                error: 'Failed to load Winners'
-            }
-        }));
-
-        throw err;
+    this.stateManager.setState(prevState => ({
+      winners: {
+        ...prevState.winners,
+        isLoading: false,
+        winners: winnersWithCars,
 
       }
-
+    }))
   }
 
 }

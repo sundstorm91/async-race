@@ -20,8 +20,10 @@ const engineApi = new EngineApi('http://localhost:3000');
 // Создаём сервисы
 const garageService = new GarageService(stateManager, eventBus, garageApi);
 const winnersService = new WinnerService(stateManager, eventBus, winnersApi, garageApi);
-const raceService = new RaceService(stateManager, eventBus, engineApi);
 const uiService = new UIService(stateManager, eventBus, garageApi, winnersApi);
+
+const raceService = new RaceService(stateManager, eventBus, engineApi, winnersService, uiService);
+
 
 // Создаём View
 const garageView = new GarageView(garageService, raceService, uiService, stateManager);
