@@ -1,4 +1,5 @@
 import type { GarageApi, WinnersApi } from "../api"
+import { Modal } from "../components/Modal/Modal"
 import type { EventBus } from "../core"
 import type { StateManager } from "../core/state-manager"
 import type { AppState, Car, RaceWinner } from "../types"
@@ -66,7 +67,6 @@ export class UIService implements IUIService {
                 }
             }
         }))
-
     }
 
     hideWinnerModal(): void {

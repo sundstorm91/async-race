@@ -28,20 +28,37 @@ const raceService = new RaceService(stateManager, eventBus, engineApi, winnersSe
 // Создаём View
 const garageView = new GarageView(garageService, raceService, uiService, stateManager);
 const winnersView = new WinnersView(uiService, stateManager, winnersService);
-
-const activeView = stateManager.getState().ui.activeView;
-
 const app = document.getElementById('app');
 
+const initialView = initialState.ui.activeView;
 
+// Храним текущую отображённую вью
+let currentView: GarageView | WinnersView | null = null;
 
-if (activeView === 'garage') {
-    console.log(`current active-view: ${activeView}`);
-
-    (garageView.mount(app!))
-
+// При старте инициализируем
+if (initialView === 'garage') {
+    currentView = garageView;
+    garageView.mount(app!);
 } else {
-    winnersView.mount(app!)
+    currentView = winnersView;
+    winnersView.mount(app!);
 }
 
+// В обработчике события
+eventBus.on('view:changed', (view) => {
+    console.log('🔄 Переключаю с', currentView?.constructor.name, 'на', view);
 
+    // 1. Демонтируем ТЕКУЩУЮ (ту, что сейчас висит в DOM)
+    if (currentView) {
+        currentView.unmount();
+    }
+
+    // 2. Монтируем НОВУЮ
+    if (view === 'garage') {
+        currentView = garageView;
+        garageView.mount(app!);
+    } else {
+        currentView = winnersView;
+        winnersView.mount(app!);
+    }
+});

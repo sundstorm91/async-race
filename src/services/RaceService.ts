@@ -272,7 +272,8 @@ export class RaceService {
 
         this.winnersService.addWinner(raceWinner);
 
-        /* this.uiService.showWinnerModal(raceWinner); */
+        console.log('ПРОВЕРКА ТЕЛА RACEWINNER - ', raceWinner)
+        this.uiService.showWinnerModal(raceWinner);
 
         cars.forEach(car => this.engineApi.stopEngine(car.id));
 

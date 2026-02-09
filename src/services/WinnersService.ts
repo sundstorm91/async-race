@@ -28,29 +28,70 @@ export class WinnerService implements IWinnersService {
 
 
   async addWinner(winner: RaceWinner): Promise<void> {
-      const data = await this.winnersApi.getWinner(winner.car.id);
-      console.log(data.time, data.wins)
-      const isExistingWinner = data.time !== null && data.time !== undefined && data.wins !== null && data.wins !== undefined;
+      console.log('🏁 addWinner для car:', winner.car.id, 'time:', winner.time);
 
-      console.log(`isExist - ${isExistingWinner}`)
+      try {
+         console.log('1. Ищем существующего...');
+        const existing = await this.winnersApi.getWinner(winner.car.id);
+        console.log('2. Нашли:', existing);
+        console.log('3. Текущие wins:', existing.wins, 'тип:', typeof existing.wins);
 
-      if (isExistingWinner) {
+        /*
 
-          await this.winnersApi.updateWinner(winner.car.id, {
-            wins: data.wins + 1,
-            time: Math.min(data.time, winner.time)
-          })
+        Аномалия! - от сервера приходят данные на обновление - только undefined. Почему так? Это сервер - логика неправильная.
+        Вариант - изменить лоигку сервера / научиться работать с API, Даже багованным. Сделать костыль! о даа..
 
-      } else {
+        Данный флоу перезаписывает время исправно , то Wins - зависает потому что она 0 всегда и прибавляет += 1 - получается
+        бесконечная единица
 
-            await this.winnersApi.updateWinner(winner.car.id, {
-              wins: 1,
-              time: winner.time
+        В целом флоу рабочий, но неправильный если касается поля wins
+
+        */
+        // ЗАЩИТА ОТ NULL!
+        const currentWins = existing.wins || 0;  // если null/undefined → 0
+        const currentTime = existing.time || Infinity;  // если null → Infinity
+
+        console.log('currentWins после защиты:', currentWins);
+        console.log('new wins для update:', currentWins + 1);
+
+        await this.winnersApi.updateWinner(winner.car.id, {
+          wins: currentWins + 1,
+          time: Math.min(currentTime, winner.time)
+        });
+
+      } catch (err: any) {
+
+        if (err?.status === 404) {
+          // Создаем нового
+          if (winner.time === undefined || winner.time === null) {
+
+            console.error('⛔ Некорректное время победителя:', winner);
+
+            throw new Error('Winner time is invalid');
+          }
+
+          console.log('создаем нового...')
+
+          console.log('📤 createWinner отправляет:', {
+            id: winner.car.id,
+            wins: 1,
+            time: winner.time
           });
+          await this.winnersApi.createWinner({
+            id: winner.car.id,
+            wins: 1,
+            time: winner.time
+          });
+
+          console.log('успешно создали..')
+        } else {
+          console.log('вылезла ошибка при создании..')
+          throw err;
+        }
+
       }
 
       this.loadWinners();
-
   }
 
   async getWinner(id: number): Promise<Winner & { car: Car }> {
@@ -74,16 +115,20 @@ export class WinnerService implements IWinnersService {
       }))
   }
 
-  async loadWinners(page: number = 1): Promise<void> {
+  async loadWinners(): Promise<void> {
       const winnersApi = await this.winnersApi.getWinners();
+      console.log('Получили ответ winnersApi - ', winnersApi.cars)
 
+      console.log('Доп проверка на ошибки...')
       const validWinners = winnersApi.cars.filter(winner =>
         winner.wins != null &&
         winner.time != null &&
         winner.wins > 0 &&       // ← дополнительная проверка
         winner.time > 0
     );
+      console.log('Проверка прошла..')
 
+      console.log('формируем winnersWithCars')
       const winnersWithCars = await Promise.all(
         validWinners.map(async(winner) => ({
             ...winner,
@@ -91,14 +136,22 @@ export class WinnerService implements IWinnersService {
         }))
     );
 
+    console.log('сформировали - ', winnersWithCars)
+
+    console.log('сформировали...')
+    const sortedWinnersWithCars = winnersWithCars.sort((a, b) => a.time - b.time)
+
+    console.log('обновляем стейт....')
     this.stateManager.setState(prevState => ({
       winners: {
         ...prevState.winners,
         isLoading: false,
-        winners: winnersWithCars,
+        winners: sortedWinnersWithCars,
 
       }
     }))
+
+    console.log('Обновили стейт, проверяем =>', this.stateManager.getState().winners)
   }
 
 }

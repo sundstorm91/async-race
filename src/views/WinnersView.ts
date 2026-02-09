@@ -41,7 +41,7 @@ export class WinnersView implements IWinnersView {
         });
 
         // Показываем только топ-5
-        const totalWinners = this.stateManager.getState().winners.pagination.total;
+        const totalWinners = this.stateManager.getState().winners.winners.length;
         const counter = document.createElement('span');
         counter.className = 'winners-counter';
         counter.textContent = `Total winners: ${totalWinners}`;
@@ -117,20 +117,21 @@ export class WinnersView implements IWinnersView {
     private update(): void {
         this.root.innerHTML = '';
         this.root.appendChild(this.renderHeader());
-        this.root.appendChild(this.renderTable());
 
-        // Простое сообщение если нет победителей
         const winners = this.stateManager.getState().winners.winners;
+
         if (winners.length === 0) {
             const message = document.createElement('p');
             message.textContent = 'No winners yet. Start a race!';
             this.root.appendChild(message);
+        } else {
+            this.root.appendChild(this.renderTable());
         }
-    }
+}
 
-    mount(container: HTMLElement): void {
+    async mount(container: HTMLElement): Promise<void> {
         // Всегда загружаем при переходе
-        this.winnersService.loadWinners();
+        await this.winnersService.loadWinners();
         this.update();
         container.appendChild(this.root);
     }
