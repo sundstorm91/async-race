@@ -9,6 +9,7 @@ import { type AppState, initialState } from './types';
 import { GarageView } from './views/GarageView';
 import { WinnersView } from './views/WinnersView';
 import './style.css';
+import { Modal } from './components/Modal/Modal';
 
 // Инициализация зависимостей
 const eventBus = new EventBus();
@@ -62,3 +63,42 @@ eventBus.on('view:changed', (view) => {
         winnersView.mount(app!);
     }
 });
+
+
+    let currentModal: Modal | null = null;
+
+    stateManager.subscribe((state) => {
+    const winnerModal = state.ui.modals.winner;
+
+    // Нет данных = ничего не делаем
+    if (!winnerModal.data) return;
+
+    // Создаем/обновляем модалку
+    if (winnerModal.isOpen) {
+        if (!currentModal) {
+        // Создаем новую
+        const content = document.createElement('div');
+        content.innerHTML = `
+            <div style="color: ${winnerModal.data.car.color}; font-weight: bold">
+            🚗 ${winnerModal.data.car.name}
+            </div>
+            <div>⏱️ Time: ${winnerModal.data.time.toFixed(2)}s</div>
+            <div>🏆 1st victory!</div>
+        `;
+
+        currentModal = new Modal({
+            isOpen: true,
+            title: '🏆 Winner!',
+            onClose: () => uiService.hideWinnerModal(),
+            children: [content],
+        });
+        }
+        // Если модалка уже есть - можно обновить её контент
+        // currentModal.update({ ... })
+    }
+    // Закрываем модалку
+    else if (currentModal) {
+        currentModal.close();
+        currentModal = null;
+    }
+    });
