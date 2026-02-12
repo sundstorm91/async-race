@@ -1,3 +1,4 @@
+import type { EventBus } from '../../../core';
 import type { CarProps } from '../../../types';
 import { Button } from '../../Button/Button';
 
@@ -9,6 +10,7 @@ export class CarComponent {
   private removeButton: Button;
   private startButton: Button;
   private stopButton: Button;
+
 
   constructor(props: CarProps) {
     this.element = document.createElement('div');

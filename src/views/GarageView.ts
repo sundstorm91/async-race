@@ -17,15 +17,16 @@ export class GarageView implements IGarageView {
     private prevPageInfo = { page: 0, totalPages: 0 };
     private prevTotalCars = 0;
     private prevRaceParticipants: RaceParticipant[] = [];
-
     private root: HTMLDivElement;
     private unsubscribe: () => void;
 
     constructor(
+
         private garageService: GarageService,
         private engineService: RaceService,
         private uiService: UIService,
         private stateManager: StateManager<AppState>,
+        private raceService: RaceService,
     ){
         this.root = document.createElement('div');
         this.root.className = 'garage-view';
@@ -33,8 +34,14 @@ export class GarageView implements IGarageView {
         /* подписываемся на изменение стейта */
 
         this.unsubscribe = stateManager.subscribe(() => {
+            console.log('🔄 [GarageView] Подписка сработала!', {
+            activeView: this.stateManager.getState().ui.activeView,
+            participantsCount: this.stateManager.getState().race.participants.length,
+            timestamp: Date.now()
+        });
 
             this.update()
+
         })
     }
 
@@ -171,6 +178,8 @@ export class GarageView implements IGarageView {
 
     unmount(): void {
         this.unsubscribe(); // Отписываемся от стейта
+        this.raceService.stopAllAnimations();
+
         this.root.remove();
     }
 
@@ -198,7 +207,6 @@ export class GarageView implements IGarageView {
                 isRacing: this.isRacing(item.id),
 
             })
-
             container.appendChild(car.render())
         })
 
@@ -271,17 +279,30 @@ export class GarageView implements IGarageView {
     }
 
 
-
-
-
     mount(container: HTMLElement): void {
         // Загружаем машины при первом монтировании
         if (this.stateManager.getState().garage.cars.length === 0) {
             this.garageService.loadCars();
         }
 
+
+                // ПЕРЕСОЗДАЁМ ПОДПИСКУ!
+            this.unsubscribe = this.stateManager.subscribe(() => {
+                this.update();
+            });
+
         this.update();
         container.appendChild(this.root);
+
+
+                // Если есть активные гонки - обновляем позиции
+            const participants = this.stateManager.getState().race.participants;
+
+        if (participants.length > 0) {
+            console.log('🚗 Есть активные участники, форсируем обновление');
+            this.update();  // Еще раз после добавления в DOM
+        }
+
     }
 
 }

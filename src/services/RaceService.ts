@@ -352,7 +352,7 @@ export class RaceService {
                 }));
     }
 
-    private stopAllAnimations() {
+    public stopAllAnimations() {
         this.animationsId.forEach(a => cancelAnimationFrame(a.animationId))
         this.animationsId.clear();
     }

@@ -27,7 +27,7 @@ const raceService = new RaceService(stateManager, eventBus, engineApi, winnersSe
 
 
 // Создаём View
-const garageView = new GarageView(garageService, raceService, uiService, stateManager);
+const garageView = new GarageView(garageService, raceService, uiService, stateManager, raceService);
 const winnersView = new WinnersView(uiService, stateManager, winnersService);
 const app = document.getElementById('app');
 
