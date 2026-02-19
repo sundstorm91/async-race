@@ -114,7 +114,7 @@ export class RaceService {
                     race: {
                         ...prevState.race,
                         participants: prevState.race.participants.map(p => p.carId === carId ? {
-                            ...p, position: progress*100,
+                            ...p, position: progress*1000,
                         } : p)
                     }
                 }))
