@@ -1,0 +1,49 @@
+.button {
+  @include button-base;
+
+  &--primary {
+    background: $primary;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background: $primary-dark;
+    }
+  }
+
+  &--secondary {
+    background: $gray-500;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background: $gray-700;
+    }
+  }
+
+  &--success {
+    background: $success;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background: $success-dark;
+    }
+  }
+
+  &--danger {
+    background: $danger;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background: $danger-dark;
+    }
+  }
+
+  &--small {
+    padding: 8px 16px;
+    font-size: 12px;
+  }
+
+  &--large {
+    padding: 16px 32px;
+    font-size: 16px;
+  }
+}

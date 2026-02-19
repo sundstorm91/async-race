@@ -1,0 +1,140 @@
+.car {
+  background: white;
+  border: 2px solid $gray-200;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+  transition: $transition-slow;
+  position: relative;
+  overflow: hidden;
+
+  &:hover {
+    border-color: $primary-light;
+    box-shadow: $shadow-md;
+  }
+
+  &--selected {
+    border-color: $primary;
+    background: $blue-50;
+  }
+
+  &--racing {
+    border-color: $success;
+    @include pulse-animation($success);
+  }
+
+  &-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+
+  &-name {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: $gray-900;
+  }
+
+  &-color {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    border: 2px solid $gray-300;
+  }
+
+  &-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+
+    @include mobile {
+      flex-direction: column;
+    }
+  }
+}
+
+.car-track {
+    position: relative;
+    height: 80px;
+    background: #2d2d2d;
+    border-radius: 8px;
+    border: 2px solid #4a4a4a;
+    overflow: hidden;
+    margin-top: 10px;
+
+    // Линии разметки (опционально)
+    background-image: linear-gradient(
+        90deg,
+        transparent 95%,
+        rgba(255, 255, 255, 0.1) 95%
+    );
+    background-size: 40px 100%;
+}
+
+.car-image {
+  position: absolute;
+    left: 20px;           // отступ от старта
+    top: 50%;
+    transform: translateY(-50%);
+    width: 80px;
+    height: 40px;
+    transition: transform 0.1s linear;
+    z-index: 2;
+
+    // Тень для объёма
+    filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.5));
+}
+
+.car-image-container {
+  width: 100px;
+  height: 50px;
+  margin: 10px 0;
+  transition: transform 0.1s linear;
+  position: relative;
+}
+
+.car-svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.car--racing .car-svg {
+  animation: car-vibration 0.2s infinite;
+}
+
+.car--selected .car-svg {
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
+}
+
+@keyframes car-vibration {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+.finish-flag {
+    position: absolute;
+    right: 20px;          // отступ от финиша
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 40px;
+    z-index: 1;
+    opacity: 0.8;
+
+    // Эффект мерцания
+    animation: flagWave 1s infinite;
+}
+
+.car-track::before {
+    content: '';
+    position: absolute;
+    left: 20px;
+    top: 0;
+    width: 4px;
+    height: 100%;
+    background: #ffd700;
+    opacity: 0.5;
+    z-index: 1;
+}

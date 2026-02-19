@@ -1,0 +1,41 @@
+@mixin mobile {
+  @media (max-width: $mobile) {
+    @content;
+  }
+}
+
+@mixin button-base {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: $transition-base;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: $shadow-sm;
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+@mixin pulse-animation($color) {
+  animation: pulse 2s infinite;
+
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba($color, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba($color, 0); }
+    100% { box-shadow: 0 0 0 0 rgba($color, 0); }
+  }
+}
