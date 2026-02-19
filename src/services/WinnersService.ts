@@ -129,17 +129,43 @@ export class WinnerService implements IWinnersService {
       console.log('Проверка прошла..')
 
       console.log('формируем winnersWithCars')
+
+        interface CarResponse {
+        cars: Car;
+        total: number;
+    }
+
+    interface WinnerWithCar {
+        id: number;
+        wins: number;
+        time: number;
+        car: Car;  // ← нам нужен именно Car, не CarResponse
+    }
+
       const winnersWithCars = await Promise.all(
-        validWinners.map(async(winner) => ({
-            ...winner,
-            car: await this.garageApi.getCar(winner.id)
-        }))
+
+
+        validWinners.map(async(winner) => {
+
+            try {
+                const carResponse = await this.garageApi.getCar(winner.id) as unknown as CarResponse;
+                const car = carResponse.cars;
+
+                return { ...winner, car };
+            } catch (err) {
+                console.error(`Car ${winner.id} not loaded:`, err);
+                return { ...winner, car: null }; // ← явный null
+            }
+
+        })
+
     );
+    const valid = winnersWithCars.filter(w => w.car !== null);
 
     console.log('сформировали - ', winnersWithCars)
 
     console.log('сформировали...')
-    const sortedWinnersWithCars = winnersWithCars.sort((a, b) => a.time - b.time)
+    const sortedWinnersWithCars = valid.sort((a, b) => a.time - b.time)
 
     console.log('обновляем стейт....')
     this.stateManager.setState(prevState => ({

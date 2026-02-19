@@ -1,3 +1,4 @@
+import { carSVG } from "../assets/svg/CarSVG";
 import { Button } from "../components/Button/Button";
 import type { StateManager } from "../core/state-manager";
 import type { UIService } from "../services/UiService";
@@ -23,6 +24,7 @@ export class WinnersView implements IWinnersView {
         this.root.className = 'winners-view';
 
         this.unsubscribe = this.stateManager.subscribe(() => {
+            console.log('🔄 WinnersView: стейт изменился!');
             this.update();
         });
     }
@@ -71,6 +73,7 @@ export class WinnersView implements IWinnersView {
 
         // Берем только топ-5 (первые 5 из массива)
         const allWinners = this.stateManager.getState().winners.winners;
+
         const topWinners = allWinners.slice(0, 5);
 
         // Строки таблицы
@@ -81,15 +84,12 @@ export class WinnersView implements IWinnersView {
             const numCell = document.createElement('td');
             numCell.textContent = (index + 1).toString();
 
-            // Цвет машины
+            // Машина + цвет
             const carCell = document.createElement('td');
-            const carIcon = document.createElement('div');
-            carIcon.className = 'car-icon';
-            carIcon.style.backgroundColor = winner.car.color;
-            carIcon.style.width = '30px';
-            carIcon.style.height = '20px';
-            carIcon.style.borderRadius = '4px';
-            carCell.appendChild(carIcon);
+            const carImage = document.createElement('div');
+
+            carImage.innerHTML = carSVG({color: winner.car.color, width: 60, height: 40 })
+            carCell.appendChild(carImage);
 
             // Имя
             const nameCell = document.createElement('td');
@@ -115,6 +115,13 @@ export class WinnersView implements IWinnersView {
     }
 
     private update(): void {
+
+        console.log('🎨 update() вызван');
+        const winnersA = this.stateManager.getState().winners.winners;
+        console.log('winners в update:', JSON.stringify(winnersA, null, 2)); // полный лог
+
+
+
         this.root.innerHTML = '';
         this.root.appendChild(this.renderHeader());
 

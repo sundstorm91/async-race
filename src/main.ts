@@ -8,7 +8,7 @@ import { WinnerService } from './services/WinnersService';
 import { type AppState, initialState } from './types';
 import { GarageView } from './views/GarageView';
 import { WinnersView } from './views/WinnersView';
-import './style.css';
+import './styles/main.scss';
 import { Modal } from './components/Modal/Modal';
 
 // Инициализация зависимостей
