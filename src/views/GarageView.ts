@@ -1,3 +1,4 @@
+import type { GarageApi } from "../api";
 import { Button } from "../components/Button/Button";
 import { CarComponent } from "../components/domain/CarComponent/CarComponent";
 import { Input } from "../components/Input/Input";
@@ -21,7 +22,7 @@ export class GarageView implements IGarageView {
     private unsubscribe: () => void;
 
     constructor(
-
+        private garageApi: GarageApi,
         private garageService: GarageService,
         private engineService: RaceService,
         private uiService: UIService,
@@ -60,7 +61,7 @@ export class GarageView implements IGarageView {
             type: 'primary',
         })
 
-        const totalCars = this.stateManager.getState().garage.pagination.total;
+        const totalCars = this.stateManager.getState().garage.cars.length;
         counter.textContent = `Total cars: ${totalCars}`;
 
         container.appendChild(button.render())
