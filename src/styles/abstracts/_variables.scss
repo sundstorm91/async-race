@@ -1,0 +1,37 @@
+// ===== COLORS =====
+$primary: #4f46e5;
+$primary-dark: #4338ca;
+$primary-light: #c7d2fe;
+
+$success: #10b981;
+$success-dark: #059669;
+$danger: #ef4444;
+$danger-dark: #dc2626;
+
+$gray-50: #f9fafb;
+$gray-100: #f3f4f6;
+$gray-200: #e5e7eb;
+$gray-300: #d1d5db;
+$gray-500: #6b7280;
+$gray-700: #4b5563;
+$gray-900: #1f2937;
+
+$blue-50: #eef2ff;
+$blue-100: #dbeafe;
+$blue-800: #1e40af;
+
+// ===== GRADIENTS =====
+$gradient-body: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+$gradient-header: linear-gradient(90deg, #4f46e5, #7c3aed);
+
+// ===== SHADOWS =====
+$shadow-sm: 0 5px 15px rgba(0, 0, 0, 0.1);
+$shadow-md: 0 5px 15px rgba(79, 70, 229, 0.1);
+$shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.3);
+
+// ===== BREAKPOINTS =====
+$mobile: 768px;
+
+// ===== ANIMATIONS =====
+$transition-base: all 0.2s ease;
+$transition-slow: all 0.3s ease;

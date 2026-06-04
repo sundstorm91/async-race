@@ -1,0 +1,56 @@
+.create-form {
+  background: $gray-50;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 30px;
+  border: 1px solid $gray-200;
+  display: grid;
+  grid-template-columns: 1fr 1fr auto auto;
+  gap: 15px;
+  align-items: end;
+
+  @include mobile {
+    grid-template-columns: 1fr;
+  }
+}
+
+.input-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.input-label {
+  font-weight: 600;
+  color: $gray-700;
+  font-size: 14px;
+}
+
+.input {
+  padding: 10px 14px;
+  border: 2px solid $gray-300;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+
+  &:focus {
+    outline: none;
+    border-color: $primary;
+  }
+
+  &--error {
+    border-color: $danger;
+  }
+}
+
+.input-error {
+  color: $danger;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+input[type="color"] {
+  height: 40px;
+  padding: 2px;
+  cursor: pointer;
+}
