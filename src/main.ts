@@ -11,12 +11,13 @@ import { WinnersView } from './views/WinnersView';
 import './styles/main.scss';
 import { Modal } from './components/Modal/Modal';
 
+const BASE_URL = 'https://652b2678-524e-4008-a68c-ca44224ef649.tunnel4.com/'
 // Инициализация зависимостей
 const eventBus = new EventBus();
 const stateManager = new StateManager<AppState>(initialState);
-const garageApi = new GarageApi('http://localhost:3000');
-const winnersApi = new WinnersApi('http://localhost:3000');
-const engineApi = new EngineApi('http://localhost:3000');
+const garageApi = new GarageApi(BASE_URL);
+const winnersApi = new WinnersApi(BASE_URL);
+const engineApi = new EngineApi(BASE_URL);
 
 // Создаём сервисы
 const garageService = new GarageService(stateManager, eventBus, garageApi);
